@@ -1,4 +1,4 @@
-﻿#define PASO_8
+﻿#define PASO_6
 
 using System;
 using System.Collections.Generic;
@@ -105,12 +105,17 @@ namespace TestDatabase
 
 
 #if PASO_3
-      //  PASO 3 - Chequear relaciones!! FULL
+            //  PASO 3 - Chequear relaciones!! FULL
 
-      //  Categoria root = (from cat in ctx.Categorias.Include("SubCategorias") where cat.Nombre == "Libros" select cat).FirstOrDefault();
-      //  1
-      //Categoria categoria = (from cat in ctx.Categorias where cat.Nombre == "Libros" select cat).FirstOrDefault();
-      Categoria categoria = (from cat in ctx.Categorias where cat.Nombre == "Informatica" select cat).FirstOrDefault();
+            //  Categoria root = (from cat in ctx.Categorias.Include("SubCategorias") where cat.Nombre == "Libros" select cat).FirstOrDefault();
+            //  1
+            //Categoria categoria = (from cat in ctx.Categorias where cat.Nombre == "Libros" select cat).FirstOrDefault();
+
+            //  Categoria categoria = (from cat in ctx.Categorias where cat.Nombre == "Informatica" select cat).FirstOrDefault();
+
+            Categoria categoria = ctx.Categorias.Include("Parent")
+                .Where(cat => cat.Nombre == "Informatica")
+                .FirstOrDefault();
 
       //  2
       Console.WriteLine($"{categoria.IDCategoria} {categoria.Nombre} {categoria.SubCategorias.Count}");
@@ -127,6 +132,11 @@ namespace TestDatabase
         Console.WriteLine($"{categoria.Nombre} es ROOT");
       else
         Console.WriteLine($"La categoria parent de {categoria.Nombre} es {categoria.Parent.Nombre}");
+
+            categoria.Cantidad = 100;
+            ctx.MostrarCambios();
+            Console.ReadLine();
+            ctx.SaveChanges();
 
 #endif
 
@@ -257,10 +267,15 @@ namespace TestDatabase
 #endif
 
 #if PASO_6
-      //  Agregamos info de contacto
-      //
+            //  Agregamos info de contacto
+            //
+            string dato = "";
+            string comentario = "";
       Persona persona = null;     //  TODO Traer una Persona desde la base de datos
-      List<TipoContacto> tipos = ctx.TiposContacto.ToList();
+           persona = ctx.Personas.Where(nom => nom.Apellidos == "Acosta")
+               .FirstOrDefault();
+
+            List<TipoContacto> tipos = ctx.TiposContacto.ToList();
 
       if (persona != null)
       {
@@ -284,11 +299,11 @@ namespace TestDatabase
             {
               Console.WriteLine("Ahora ingrese el dato del contacto");
 
-              string dato = Console.ReadLine();
+             dato = Console.ReadLine();
 
               Console.WriteLine("Por ultimo un comentario (o Enter si no desea comentario)");
 
-              string comentario = Console.ReadLine();
+               comentario = Console.ReadLine();
 
               //  TODO Agregar el nuevo contacto a la Persona
             }
@@ -305,9 +320,17 @@ namespace TestDatabase
         if (ctx.ChangeTracker.HasChanges())
         {
           Console.WriteLine("Guardando info de contacto");
-          //  ctx.MostrarCambios();
-          //  Console.ReadLine();
-          ctx.SaveChanges();
+                    Contacto nuevo = new Contacto();
+
+                    nuevo.IDContacto = int.Parse(persona.IDPersona.ToString());
+                    nuevo.Dato = dato;
+                    nuevo.Comentario = comentario;
+                    
+                    ctx.Add(nuevo);
+                    ctx.SaveChanges();
+                    //  ctx.MostrarCambios();
+                    //  Console.ReadLine();
+                    ctx.SaveChanges();
         }
         else
         {

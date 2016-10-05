@@ -18,7 +18,7 @@ namespace Entidades
     public int? Cantidad { get; set; }
 
     public virtual HashSet<Categoria> SubCategorias { get; set; }
-    public virtual Categoria Parent { get; set; }
+    public virtual  Categoria Parent { get; set; }
 
     public Categoria()
     {
