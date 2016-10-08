@@ -22,6 +22,8 @@ namespace Data
   {
     public DbSet<Categoria> Categorias { get; set; }
 
+    public DbSet<Contacto> Contactos { get; set; }
+
     public DbSet<Localidad> Localidades { get; set; }
 
     public DbSet<Provincia> Provincias { get; set; }

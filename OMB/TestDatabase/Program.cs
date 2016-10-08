@@ -26,7 +26,7 @@ namespace TestDatabase
        */
       //  https://www.connectionstrings.com/sql-server-compact/
       //
-      //  OMBContext ctx = new OMBContext(@"Data source=F:\CURSO_2016_01\master\OMB\db\OMB.sdf;Persist Security Info=False;");
+    //  OMBContext ctx = new OMBContext(@"Data source=F:\CURSO_2016_01\master\OMB\db\OMB.sdf;Persist Security Info=False;");
       OMBContext ctx = OMBContext.DB;
 
       AppDomain.CurrentDomain.UnhandledException += (o, e) => { ctx.Dispose(); Console.WriteLine("Excepcion"); };
@@ -272,14 +272,15 @@ namespace TestDatabase
             string dato = "";
             string comentario = "";
       Persona persona = null;     //  TODO Traer una Persona desde la base de datos
-           persona = ctx.Personas.Where(nom => nom.Apellidos == "Acosta")
-               .FirstOrDefault();
+     
+        persona = ctx.Personas.Where(nom => nom.Apellidos == "Acosta").First();
+               
 
             List<TipoContacto> tipos = ctx.TiposContacto.ToList();
 
       if (persona != null)
       {
-        Console.WriteLine($"Agregar contactos para {persona.Nombres} {persona.Apellidos}");
+        Console.WriteLine("Agregar contactos para {0} {1}",persona.Nombres ,persona.Apellidos);
 
         while (true)
         {
@@ -290,7 +291,7 @@ namespace TestDatabase
             Console.WriteLine("Esta es la lista de posibles tipos de contacto\nElegir un # de tipo y luego ingresarlo");
 
             for (int idx = 1; idx <= tipos.Count ; idx++)
-              Console.WriteLine($"{idx} ----- {tipos[idx-1].Descripcion}");
+              Console.WriteLine("{0} ----- {1}", idx,tipos[idx-1].Descripcion);
 
             string opcion = Console.ReadLine();
             int numOpcion;
@@ -305,11 +306,24 @@ namespace TestDatabase
 
                comentario = Console.ReadLine();
 
-              //  TODO Agregar el nuevo contacto a la Persona
+               Contacto nuevo = new Contacto();
+               
+               nuevo.Tipo = ctx.TiposContacto.Where(tc => tc.IDTipoContacto == 2).First() ;
+               
+                byte[] gb = persona.IDPersona.ToByteArray();
+               int i = BitConverter.ToInt32(gb, 0);
+
+               nuevo.IDContacto = i;
+               nuevo.Dato = dato;
+               nuevo.Comentario = comentario;
+                
+               persona.InfoContacto.Add(nuevo);
+             
+              
             }
             else
             {
-              Console.WriteLine($"Opcion no valida, debe estar entre 1 y {tipos.Count}");
+              Console.WriteLine("Opcion no valida, debe estar entre 1 y {0}",tipos.Count);
             }
           }
           else
@@ -320,17 +334,11 @@ namespace TestDatabase
         if (ctx.ChangeTracker.HasChanges())
         {
           Console.WriteLine("Guardando info de contacto");
-                    Contacto nuevo = new Contacto();
-
-                    nuevo.IDContacto = int.Parse(persona.IDPersona.ToString());
-                    nuevo.Dato = dato;
-                    nuevo.Comentario = comentario;
-                    
-                    ctx.Add(nuevo);
+                   
                     ctx.SaveChanges();
                     //  ctx.MostrarCambios();
                     //  Console.ReadLine();
-                    ctx.SaveChanges();
+                   
         }
         else
         {
